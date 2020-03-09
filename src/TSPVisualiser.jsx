@@ -1,7 +1,7 @@
 import React from "react";
 
 const ANIMATION_SPEED = 1;
-const NUM_POINTS = 20;
+const NUM_POINTS = 50;
 const CANVAS_HEIGHT = 500;
 const CANVAS_WIDTH = 500;
 
@@ -26,11 +26,9 @@ export default class TSPVisualiser extends React.Component {
 
   resetArray() {
     const cities = [];
-    this.ctx.clearRect(0, 0, CANVAS_HEIGHT, CANVAS_WIDTH);
     for (let i = 0; i < NUM_POINTS; i++) {
       cities.push(randomCoords(0, 500));
     }
-    console.log(cities);
     this.setState({ cities });
   }
 
@@ -39,21 +37,23 @@ export default class TSPVisualiser extends React.Component {
 
   christofidesAlg() {}
 
-  componentDidMount() {
-    const canvas = this.refs.myCanvas;
-    this.ctx = canvas.getContext("2d");
-  }
   render() {
     const { cities } = this.state;
-    cities.map(value => drawCoordinates(this.ctx, value));
-
     return (
       <div className="pointContainer">
-        <canvas
-          ref="myCanvas"
-          height={CANVAS_HEIGHT}
-          width={CANVAS_WIDTH}
-        ></canvas>
+        {cities.map(value => (
+          <div
+            className="city"
+            style={{
+              backgroundColor: POINT_COLOUR,
+              position: "absolute",
+              top: value[0],
+              left: value[1],
+              height: `10px`,
+              width: `10px`
+            }}
+          ></div>
+        ))}
         <button onClick={() => this.resetArray()}>Generate New Array</button>
         <button onClick={() => this.testAlg()}>Test Algorithm</button>
       </div>
@@ -71,11 +71,4 @@ function distance(a, b) {
   const deltaX = a.x - b.x;
   const deltaY = a.y - b.y;
   return Math.hypot(deltaX, deltaY);
-}
-
-function drawCoordinates(canvas, coords) {
-  canvas.fillStyle = POINT_COLOUR;
-  canvas.beginPath();
-  canvas.arc(coords[0], coords[1], 5, 0, 2 * Math.PI, true);
-  canvas.fill();
 }

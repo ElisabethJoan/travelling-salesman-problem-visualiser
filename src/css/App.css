@@ -8,3 +8,9 @@
   display: inline-block;
   margin: 0 1px;
 }
+
+.city {
+  border-radius: 50%;
+  height: 50px;
+  width: 50px;
+}
