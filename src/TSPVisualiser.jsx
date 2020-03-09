@@ -1,20 +1,19 @@
 import React from "react";
 
-const ANIMATION_SPEED = 1;
-const NUM_POINTS = 50;
+const ANIMATION_SPEED = 100;
+const NUM_POINTS = 20;
 const CANVAS_HEIGHT = 500;
 const CANVAS_WIDTH = 500;
 
-const POINT_COLOUR = "blue";
+const POINT_COLOUR = "turquoise";
 const PATH_COLOUR = "light blue";
-const ACTIVE_POINT_COLOUR = "green";
+const ACTIVE_POINT_COLOUR = "fuchsia";
 const ACTIVE_PATH_COLOUR = "grey";
 
 export default class TSPVisualiser extends React.Component {
   constructor(props) {
     super(props);
 
-    this.myCanvas = React.createRef();
     this.state = {
       cities: []
     };
@@ -33,18 +32,31 @@ export default class TSPVisualiser extends React.Component {
   }
 
   //THE ALGOS
-  testAlg() {}
+  testAlg() {
+    for (let i = 1; i < NUM_POINTS; i++) {
+      const arrayPoints = document.getElementsByClassName("city");
+      setTimeout(() => {
+        const prevPoint = arrayPoints[i - 1].style;
+        const currentPoint = arrayPoints[i].style;
+        prevPoint.backgroundColor = POINT_COLOUR;
+        currentPoint.backgroundColor = ACTIVE_POINT_COLOUR;
+      }, i * ANIMATION_SPEED);
+    }
+  }
 
   christofidesAlg() {}
 
   render() {
     const { cities } = this.state;
+
     return (
       <div className="pointContainer">
-        {cities.map(value => (
+        {cities.map((value, idx) => (
           <div
             className="city"
+            key={idx}
             style={{
+              // backgroundColor: this.state.backgroundColor,
               backgroundColor: POINT_COLOUR,
               position: "absolute",
               top: value[0],
