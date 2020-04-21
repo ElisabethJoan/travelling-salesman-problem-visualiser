@@ -2,8 +2,6 @@ import React from "react";
 
 const ANIMATION_SPEED = 100;
 const NUM_POINTS = 20;
-const CANVAS_HEIGHT = 500;
-const CANVAS_WIDTH = 500;
 
 const POINT_COLOUR = "turquoise";
 const PATH_COLOUR = "light blue";
@@ -20,26 +18,43 @@ export default class TSPVisualiser extends React.Component {
   }
 
   componentDidMount() {
-    this.resetArray();
+    this.resetArray(0);
   }
 
-  resetArray() {
+  resetArray(x) {
     const cities = [];
     for (let i = 0; i < NUM_POINTS; i++) {
       cities.push(randomCoords(0, 500));
+    }
+    const arrayPoints = document.getElementsByClassName("city");
+    if (x === 1) {
+      for (let i = 0; i < NUM_POINTS; i++) {
+        let x = arrayPoints[i].style;
+        x.backgroundColor = POINT_COLOUR;
+      }
     }
     this.setState({ cities });
   }
 
   //THE ALGOS
   testAlg() {
-    for (let i = 1; i < NUM_POINTS; i++) {
-      const arrayPoints = document.getElementsByClassName("city");
+    const arrayPoints = document.getElementsByClassName("city");
+    const arrayLines = document.getElementsByClassName("lines");
+    for (let i = 1; i <= NUM_POINTS; i++) {
       setTimeout(() => {
-        const prevPoint = arrayPoints[i - 1].style;
-        const currentPoint = arrayPoints[i].style;
-        prevPoint.backgroundColor = POINT_COLOUR;
-        currentPoint.backgroundColor = ACTIVE_POINT_COLOUR;
+        if (i === NUM_POINTS) {
+          let prevPoint = arrayPoints[i - 1].style;
+          let currentPoint = arrayPoints[0].style;
+          prevPoint.backgroundColor = POINT_COLOUR;
+          currentPoint.backgroundColor = ACTIVE_POINT_COLOUR;
+          arrayLines[0].stroke = "black";
+        } else {
+          let prevPoint = arrayPoints[i - 1].style;
+          let currentPoint = arrayPoints[i].style;
+          prevPoint.backgroundColor = POINT_COLOUR;
+          currentPoint.backgroundColor = ACTIVE_POINT_COLOUR;
+          arrayLines[i].stroke = "green";
+        }
       }, i * ANIMATION_SPEED);
     }
   }
@@ -66,7 +81,20 @@ export default class TSPVisualiser extends React.Component {
             }}
           ></div>
         ))}
-        <button onClick={() => this.resetArray()}>Generate New Array</button>
+        <svg width="500" height="500">
+          {cities.map((value, idx, element) => (
+            <line
+              className="lines"
+              key={idx}
+              x1={value[1]}
+              y1={value[0]}
+              x2="500"
+              y2="500"
+              stroke="black"
+            />
+          ))}
+        </svg>
+        <button onClick={() => this.resetArray(1)}>Generate New Array</button>
         <button onClick={() => this.testAlg()}>Test Algorithm</button>
       </div>
     );
