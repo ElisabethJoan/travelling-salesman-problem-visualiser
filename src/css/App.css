@@ -9,7 +9,7 @@
   margin: 0 1px;
 }
 
-.city {
+.city, .route {
   border-radius: 50%;
   height: 50px;
   width: 50px;
