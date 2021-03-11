@@ -1,16 +1,15 @@
 import React from "react";
 
-const ANIMATION_SPEED = 100;
+const ANIMATION_DELAY = 30;
 const NUM_POINTS = 20;
 
-const POINT_COLOUR = "turquoise";
-// const PATH_COLOUR = "light blue";
+const POINT_COLOUR = "grey";
+const PATH_COLOUR = "turquoise";
 const ACTIVE_POINT_COLOUR = "fuchsia";
 const SEEKING_PATH_COLOUR = "lightgrey";
-const VISITED_POINT_COLOUR = "grey"
+const VISITED_POINT_COLOUR = "turquoise"
 
 const timer = ms => new Promise(res => setTimeout(res, ms));
-
 
 export default class TSPVisualiser extends React.Component {
   constructor(props) {
@@ -19,17 +18,21 @@ export default class TSPVisualiser extends React.Component {
     this.state = {
       cities: [],
       route: [],
-      lines: []
+      current: [],
+      lines: [],
+      seeking: [[0, 0], [0, 0]],
     };
   }
+
 
   componentDidMount() {
     this.resetArray(0);
   }
 
+
   resetArray(x) {
     const cities = [];
-    // lines = [];
+
     for (let i = 0; i < NUM_POINTS; i++) {
       cities.push(randomCoords(0, 500));
     }
@@ -39,33 +42,16 @@ export default class TSPVisualiser extends React.Component {
         arrayPoints[i].style.backgroundColor = POINT_COLOUR;;
       }
     }
-    this.setState({ cities: cities, route:[], lines: []});
+    this.setState({ cities: cities, route: [], lines: []});
   }
+
 
   refresh () {
     console.log(this.state)
     this.forceUpdate()
   }
 
-  dots() {
-    const arrayPoints = document.getElementsByClassName("city");
-    // const arrayLines = document.getElementsByClassName("line");
-    // console.log(arrayPoints[0])
-    for (let i = 1; i <= NUM_POINTS; i++) {
-      setTimeout(() => {
-        let prevPoint = arrayPoints[i - 1].style;
-        let currentPoint;
-        if (i === NUM_POINTS) {
-          currentPoint = arrayPoints[0].style;
-        } else {
-          currentPoint = arrayPoints[i].style;
-        }
-          prevPoint.backgroundColor = VISITED_POINT_COLOUR;
-          currentPoint.backgroundColor = ACTIVE_POINT_COLOUR;
-      }, i * ANIMATION_SPEED);
-    }
-  }
-
+  //THE ALGOS
   async test () {
     let arrayPoints = [];
     this.state.cities.map((value, idx) => {
@@ -76,13 +62,18 @@ export default class TSPVisualiser extends React.Component {
     newArray.push(arrayPoints.shift());
     
     while (arrayPoints.length > 0) {
-      let toAdd = arrayPoints.shift();;
+      let toAdd = arrayPoints.shift();
+
+      this.setState({ current: [toAdd] })
+
+      // console.log(this.state.current);
+
       let bestPos = 1;
       let minDist = Number.MAX_SAFE_INTEGER;
       let storage;
       let wowlines = this.state.lines;
       for (let i = 1; i <= newArray.length - 1; i++) {
-          this.setState({ lines: [] })
+          this.setState({ seeking: [[0, 0], [0, 0]] })
           let next = i;
           let prev = i - 1;
           
@@ -96,24 +87,23 @@ export default class TSPVisualiser extends React.Component {
             minDist = storage;
             bestPos = i;
           }
-          this.setState({ lines: [...wowlines, toAdd, newArray[next]] })
-          await timer(10);
+          this.setState({ seeking: [toAdd, newArray[next]] })
+          await timer(ANIMATION_DELAY);
       }
       newArray.splice(bestPos, 0, toAdd);
-      this.setState({ lines: newArray })
+      this.setState({ lines: newArray, route: newArray, current: [] })
 
     }
-    this.setState({cities: newArray, lines: newArray });
-    this.dots();
-
+    this.setState({cities: newArray, seeking: [[0, 0], [0, 0]] });
+    // this.dots();
   }
-  //THE ALGOS
 
 
   christofidesAlg() {}
 
+
   render() {
-    const { cities, route, lines } = this.state;
+    const { cities, route, current, lines, seeking } = this.state;
 
     return (
       <div className="pointContainer">
@@ -122,7 +112,6 @@ export default class TSPVisualiser extends React.Component {
             className="city"
             key={idx}
             style={{
-              // backgroundColor: this.state.backgroundColor,
               backgroundColor: POINT_COLOUR,
               position: "absolute",
               top: value[0] - 5,
@@ -137,7 +126,20 @@ export default class TSPVisualiser extends React.Component {
             className="route"
             key={idx}
             style={{
-              // backgroundColor: this.state.backgroundColor,
+              backgroundColor: VISITED_POINT_COLOUR,
+              position: "absolute",
+              top: value[0] - 5,
+              left: value[1] - 5,
+              height: `10px`,
+              width: `10px`
+            }}
+          ></div>
+        ))}
+        {current.map((value, idx) => (
+          <div
+            className="current"
+            key={idx}
+            style={{
               backgroundColor: ACTIVE_POINT_COLOUR,
               position: "absolute",
               top: value[0] - 5,
@@ -168,15 +170,21 @@ export default class TSPVisualiser extends React.Component {
               y1 = {value[0]}
               x2 = {prev[1]}
               y2 = {prev[0]}
-              stroke = {SEEKING_PATH_COLOUR}
+              stroke = {PATH_COLOUR}
             />
             )})}
+            <line
+              className = "seeking"
+              x1 = {seeking[0][1]}
+              y1 = {seeking[0][0]}
+              x2 = {seeking[1][1]}
+              y2 = {seeking[1][0]}
+              stroke = {SEEKING_PATH_COLOUR}
+            />
             </svg>
 
-
         <button onClick={() => this.resetArray(1)}>Generate New Array</button>
-        <button onClick={() => this.refresh()}>Refresh</button>
-        {/* <button onClick={() => this.testAlg()}>Dot Colour</button> */}
+        {/* <button onClick={() => this.refresh()}>Force Render</button> */}
         <button onClick={() => this.test()}>Test Algorithm</button>
       </div>
     );

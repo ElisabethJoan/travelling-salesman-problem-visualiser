@@ -9,7 +9,7 @@
   margin: 0 1px;
 }
 
-.city, .route {
+.city, .route, .current {
   border-radius: 50%;
   height: 50px;
   width: 50px;
