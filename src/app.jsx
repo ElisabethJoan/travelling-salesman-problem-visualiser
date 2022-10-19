@@ -1,10 +1,11 @@
 import React from "react";
 import LineTo from "react-lineto";
+import { Slider } from 'rsuite';
 
 import City, { createCities } from "./city"
 
-const ANIMATION_DELAY = 50;
-const NUM_POINTS = 20;
+import "rsuite/dist/rsuite.min.css";
+import "./css/app.css"
 
 const timer = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -16,14 +17,16 @@ export default class App extends React.Component {
             cities: [],
             lines: [],
             seeking: [{className: "none"}, {className: "none"}],
+            ANIMATION_DELAY: 50,
+            NUM_POINTS: 20
         };
     }
 
     begin() {
         const coords = [];
 
-        for (let i = 0; i < NUM_POINTS; i++) {
-            coords.push(randomCoords(100, 600));
+        for (let i = 0; i < this.state.NUM_POINTS; i++) {
+            coords.push(randomCoords(140, 700));
         }
 
         const cities = createCities(coords);
@@ -46,7 +49,7 @@ export default class App extends React.Component {
         this.reset(cities);
         let route = [];
         let dist = Infinity;
-        let bestIdx = Math.floor(Math.random() * 19);
+        let bestIdx = Math.floor(Math.random() * (cities.length - 1));
         let temp = bestIdx
 
         while (cities.length > 0) {
@@ -64,7 +67,7 @@ export default class App extends React.Component {
                     bestIdx = i;
                 }
                 this.setState({ seeking: [active, cities[i]] })
-                await timer(ANIMATION_DELAY);
+                await timer(this.state.ANIMATION_DELAY);
             }
             active.isActive = false;
             active.isRoute = true;
@@ -107,7 +110,7 @@ export default class App extends React.Component {
                     bestPos = i;
                 }
                 this.setState({ seeking: [toAdd, route[next]] })
-                await timer(ANIMATION_DELAY);
+                await timer(this.state.ANIMATION_DELAY);
             }
             toAdd.isActive = false;
             toAdd.isRoute = true;
@@ -120,13 +123,42 @@ export default class App extends React.Component {
 
 
     render() {
-        const { cities, seeking, lines } = this.state;
+        const { cities, seeking, lines, ANIMATION_DELAY, NUM_POINTS } = this.state;
 
         return (
             <div className="App">
-                <button onClick={() => this.begin()}>Generate New Array</button>
-                <button onClick={() => this.nearestNeighbour(cities)}>Nearest Neighbour</button>
-                <button onClick={() => this.nearestInsertion(cities)}>Nearest Insertion</button>
+                <div className="interface">
+                    <div className="algoButtons">
+                        <h5>Algorithms</h5>
+                        <ul>
+                            <li><button onClick={() => this.nearestNeighbour(cities)}>Nearest Neighbour</button></li>
+                            <li><button onClick={() => this.nearestInsertion(cities)}>Nearest Insertion</button></li>
+                            <li><button>Temp</button></li>
+                            <li><button>Temp</button></li>
+                            <li><button>Temp</button></li>
+                            <li><button>Temp</button></li>
+                            <li><button>Temp</button></li>
+                            <li><button>Temp</button></li>
+                        </ul>
+                    </div>
+                    <ul>
+                        <li><h5>Settings</h5></li>
+                        <li><button onClick={() => this.begin()}>Generate New Array</button></li>
+                        <li><span>Animation Delay</span><Slider defaultValue={ANIMATION_DELAY} min={10} step={10}
+                            max={100} graduated progress value={ANIMATION_DELAY}
+                            onChange={value => {
+                                this.setState({ ANIMATION_DELAY: value });
+                            }} />
+                        </li>
+                        <li><span>City Count</span><Slider defaultValue={NUM_POINTS} min={3} step={1}
+                            max={50} graduated progress value={NUM_POINTS} 
+                            onChange={value => {
+                                this.setState({ NUM_POINTS: value });
+                                this.begin();
+                            }} />
+                        </li>
+                    </ul>
+                </div>
                 <div>
                     {cities.map((city) => {
                         return (
