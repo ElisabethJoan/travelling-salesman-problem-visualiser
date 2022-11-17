@@ -7,10 +7,10 @@
     background-color: grey;
 }
 
-.active {
-    background-color: fuchsia;
-}
-
 .route {
     background-color: turquoise;
+}
+
+.active {
+    background-color: fuchsia;
 }

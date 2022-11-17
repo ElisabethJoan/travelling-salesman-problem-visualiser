@@ -2,6 +2,7 @@ import React from "react";
 import LineTo from "react-lineto";
 import { Slider } from 'rsuite';
 
+import { nearestNeighbour, nearestInsertion } from "./algorithms";
 import City, { createCities } from "./city"
 
 import "rsuite/dist/rsuite.min.css";
@@ -16,7 +17,7 @@ export default class App extends React.Component {
         this.state = {
             cities: [],
             lines: [],
-            seeking: [{className: "none"}, {className: "none"}],
+            seeking: [{className: "none"}, [{className: "none"}]],
             ANIMATION_DELAY: 50,
             NUM_POINTS: 20
         };
@@ -42,83 +43,38 @@ export default class App extends React.Component {
             city.isRoute = false;
         })
 
-        this.setState({ cities: cities })
+        this.setState({ cities: cities, lines: [] })
     }
 
-    async nearestNeighbour(cities) {
-        this.reset(cities);
-        let route = [];
-        let dist = Infinity;
-        let bestIdx = Math.floor(Math.random() * (cities.length - 1));
-        let temp = bestIdx
+    async displayPath(route) {
+        console.log(route)
+        for (const step of route.slice(0, -1)) {
+            let visited = step['visited']
+            
+            visited.forEach((e) => {
+                e.isRoute = true;
+            })
 
-        while (cities.length > 0) {
-            let minDist = Infinity
-            let active = cities[bestIdx];
-            active.isActive = true;
-            // this.forceUpdate()
-            cities.splice(bestIdx, 1);
-            this.setState({ cities: cities.concat([active]).concat(route) })
+            let unvisited = step['unvisited']
+            this.setState({ cities: visited.concat(unvisited), lines: visited })
 
-            for (let i = 0; i < cities.length - 1; i++) {
-                dist = distance(active, cities[i]);
-                if (dist < minDist) {
-                    minDist = dist;
-                    bestIdx = i;
+            for (let i = 0; i < step['active'].length; i++) {
+                // console.log(step['active'][i])
+                step['active'][i].isActive = true;
+                step['active'][i].isRoute = false;
+                for (let j = 0; j < step['seeking'][i].length; j++) {
+                    this.setState({ seeking: [step['active'][i], step['seeking'][i][j]] })
+                    await timer(this.state.ANIMATION_DELAY);
                 }
-                this.setState({ seeking: [active, cities[i]] })
-                await timer(this.state.ANIMATION_DELAY);
+                step['active'][i].isActive = false;
+                step['active'][i].isRoute = true;
             }
-            active.isActive = false;
-            active.isRoute = true;
-            route.push(active);
-            this.setState({ cities: route.concat(cities), lines: route.concat(cities[bestIdx]) })
         }
 
-        this.setState({ cities: route, seeking: [{className: "none"}, {className: "none"}], lines: route.concat({ className: `${temp}` }) })
-    }
-
-
-    async nearestInsertion(cities) {
-        this.reset(cities);
-        let route = [];
-        cities[0].isRoute = true;
-        route.push(cities.shift())
-        cities[0].isRoute = true;
-        route.push(cities.shift())
-
-        while (cities.length > 0) {
-            let toAdd = cities.shift();
-            toAdd.isActive = true;
-            this.forceUpdate();
-
-            let bestPos = 1;
-            let minDist = Infinity;
-            let dist;
-            for (let i = 1; i <= route.length - 1; i++) {
-                let next = i;
-                let prev = i - 1;
-
-                if (i === route.length) {
-                    next = 0;
-                }
-
-                dist = distance(route[prev], toAdd) + distance(toAdd, route[next]) - distance(route[prev], route[next]);
-
-                if (dist < minDist) {
-                    minDist = dist;
-                    bestPos = i;
-                }
-                this.setState({ seeking: [toAdd, route[next]] })
-                await timer(this.state.ANIMATION_DELAY);
-            }
-            toAdd.isActive = false;
-            toAdd.isRoute = true;
-            route.splice(bestPos, 0, toAdd);
-
-            this.setState({ cities: route.concat(cities), lines: route })
-        }
-        this.setState({cities: route, seeking: [{className: "none"}, {className: "none"}], lines: route.concat([{ className: "0"}]) });
+        this.setState({ cities: route[route.length - 1]['visited'], 
+            seeking: [{className: "none"}, [{className: "none"}]], 
+            lines: route[route.length - 1]['visited'].concat(route[route.length - 1]['visited'][0]) })
+        this.forceUpdate()
     }
 
 
@@ -131,8 +87,8 @@ export default class App extends React.Component {
                     <div className="algoButtons">
                         <h5>Algorithms</h5>
                         <ul>
-                            <li><button onClick={() => this.nearestNeighbour(cities)}>Nearest Neighbour</button></li>
-                            <li><button onClick={() => this.nearestInsertion(cities)}>Nearest Insertion</button></li>
+                            <li><button onClick={() => this.displayPath(nearestNeighbour(cities))}>Nearest Neighbour</button></li>
+                            <li><button onClick={() => this.displayPath(nearestInsertion(cities))}>Nearest Insertion</button></li>
                             <li><button>Temp</button></li>
                             <li><button>Temp</button></li>
                             <li><button>Temp</button></li>
@@ -144,7 +100,7 @@ export default class App extends React.Component {
                     <ul>
                         <li><h5>Settings</h5></li>
                         <li><button onClick={() => this.begin()}>Generate New Array</button></li>
-                        <li><span>Animation Delay</span><Slider defaultValue={ANIMATION_DELAY} min={10} step={10}
+                        <li><span>Animation Delay</span><Slider defaultValue={ANIMATION_DELAY} min={5} step={5}
                             max={100} graduated progress value={ANIMATION_DELAY}
                             onChange={value => {
                                 this.setState({ ANIMATION_DELAY: value });
@@ -172,11 +128,16 @@ export default class App extends React.Component {
                             />
                         );
                     })}
-                    <LineTo 
-                        from={`${seeking[0].className}`}
-                        to={`${seeking[1].className}`}
-                        borderColor="lightgrey"
-                    />
+                    {seeking[1].map((city, idx) => {
+                        return (
+                            <LineTo 
+                                key={idx}
+                                from={`${seeking[0].className}`}
+                                to={`${city.className}`}
+                                borderColor="lightgrey"
+                            />
+                        );
+                    })}
                     {lines.map((line, idx, lines) => {
                         let end;
                         if (idx === lines.length - 1) {
