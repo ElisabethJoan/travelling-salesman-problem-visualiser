@@ -5,6 +5,7 @@ import { Slider } from "rsuite";
 import {
   nearestNeighbour,
   nearestInsertion,
+  farthestInsertion,
   cheapestInsertion,
 } from "./algorithms";
 import City, { createCities } from "./city";
@@ -14,6 +15,11 @@ import "./css/app.css";
 
 const timer = (ms) => new Promise((res) => setTimeout(res, ms));
 
+const flipActive = (city) => {
+  city.isActive = !city.isActive;
+  city.isRoute = !city.isRoute;
+};
+
 export default class App extends React.Component {
   constructor(props) {
     super(props);
@@ -22,8 +28,8 @@ export default class App extends React.Component {
       cities: [],
       lines: [],
       seeking: [[{ className: "none" }], [{ className: "none" }]],
-      ANIMATION_DELAY: 50,
-      NUM_POINTS: 20,
+      ANIMATION_DELAY: 300,
+      NUM_POINTS: 5,
     };
   }
 
@@ -54,28 +60,40 @@ export default class App extends React.Component {
     // console.log(route);
     for (const step of route.slice(0, -1)) {
       let visited = step["visited"];
+      let unvisited = step["unvisited"];
 
       visited.forEach((e) => {
         e.isRoute = true;
       });
 
-      let unvisited = step["unvisited"];
       this.setState({ cities: visited.concat(unvisited), lines: visited });
 
       for (let i = 0; i < step["active"].length; i++) {
-        // console.log(step['active'][i])
-        step["active"][i].isActive = true;
-        step["active"][i].isRoute = false;
+        step["visited"][i].isActive = true;
+        step["visited"][i].isRoute = false;
         for (let j = 0; j < step["seeking"][i].length; j++) {
-          //   console.log(step["active"][i]);
-          //   console.log(step["seeking"]);
           this.setState({
             seeking: [step["active"][i], step["seeking"][i][j]],
           });
           await timer(this.state.ANIMATION_DELAY);
         }
-        step["active"][i].isActive = false;
-        step["active"][i].isRoute = true;
+        step["visited"][i].isActive = false;
+        step["visited"][i].isRoute = true;
+      }
+
+      if (step["chosen"]) {
+        let chosenCity = step["chosen"];
+        chosenCity.isActive = true;
+        this.forceUpdate();
+        let insertionSteps = step["insertionSteps"];
+
+        for (let i = 0; i < insertionSteps.length; i++) {
+          // console.log(insertionSteps[i]);
+          this.setState({
+            seeking: [[chosenCity], insertionSteps[i]],
+          });
+          await timer(this.state.ANIMATION_DELAY);
+        }
       }
     }
 
@@ -108,6 +126,13 @@ export default class App extends React.Component {
               </li>
               <li>
                 <button
+                  onClick={() => this.displayPath(cheapestInsertion(cities))}
+                >
+                  Cheapest Insertion
+                </button>
+              </li>
+              <li>
+                <button
                   onClick={() => this.displayPath(nearestInsertion(cities))}
                 >
                   Nearest Insertion
@@ -115,13 +140,10 @@ export default class App extends React.Component {
               </li>
               <li>
                 <button
-                  onClick={() => this.displayPath(cheapestInsertion(cities))}
+                  onClick={() => this.displayPath(farthestInsertion(cities))}
                 >
-                  Cheapest Insertion
+                  Farthest Insertion
                 </button>
-              </li>
-              <li>
-                <button>Temp</button>
               </li>
               <li>
                 <button>Temp</button>
@@ -228,10 +250,4 @@ function randomCoords(min, max) {
   let x = Math.floor(Math.random() * (max - min + 1) + min);
   let y = Math.floor(Math.random() * (max - min + 1) + min);
   return [x, y];
-}
-
-function distance(a, b) {
-  const deltaX = a.x - b.x;
-  const deltaY = a.y - b.y;
-  return Math.sqrt(deltaX ** 2 + deltaY ** 2);
 }
