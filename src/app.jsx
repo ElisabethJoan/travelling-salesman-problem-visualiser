@@ -1,7 +1,6 @@
 import React from "react";
 import LineTo from "react-lineto";
 import { Slider } from "rsuite";
-
 import {
   nearestNeighbour,
   nearestInsertion,
@@ -51,6 +50,7 @@ export default class App extends React.Component {
   reset(cities) {
     cities.map((city) => {
       city.isRoute = false;
+      city.isActive = false;
     });
 
     this.setState({ cities: cities, lines: [] });
@@ -66,19 +66,25 @@ export default class App extends React.Component {
         e.isRoute = true;
       });
 
+      // console.log(visited);
+      // console.log(unvisited);
       this.setState({ cities: visited.concat(unvisited), lines: visited });
 
       for (let i = 0; i < step["active"].length; i++) {
-        step["visited"][i].isActive = true;
-        step["visited"][i].isRoute = false;
+        // console.log(step["active"][i]);
+        // console.log(step["seeking"][i]);
+        // step["visited"][i].isActive = true;
+        // step["visited"][i].isRoute = false;
         for (let j = 0; j < step["seeking"][i].length; j++) {
-          this.setState({
-            seeking: [step["active"][i], step["seeking"][i][j]],
-          });
-          await timer(this.state.ANIMATION_DELAY);
+          for (let k = 0; k < step["active"][i].length; k++) {
+            this.setState({
+              seeking: [step["active"][i], step["seeking"][i][j]],
+            });
+            await timer(this.state.ANIMATION_DELAY);
+          }
         }
-        step["visited"][i].isActive = false;
-        step["visited"][i].isRoute = true;
+        // step["visited"][i].isActive = false;
+        // step["visited"][i].isRoute = true;
       }
 
       if (step["chosen"]) {
@@ -104,13 +110,14 @@ export default class App extends React.Component {
         route[route.length - 1]["visited"][0]
       ),
     });
+    // console.log(this.state.cities);
     this.forceUpdate();
   }
 
   render() {
     const { cities, seeking, lines, ANIMATION_DELAY, NUM_POINTS } = this.state;
 
-    // console.log(seeking);
+    // console.log(cities);
     return (
       <div className="App">
         <div className="interface">
@@ -119,28 +126,40 @@ export default class App extends React.Component {
             <ul>
               <li>
                 <button
-                  onClick={() => this.displayPath(nearestNeighbour(cities))}
+                  onClick={() => {
+                    this.reset(cities);
+                    this.displayPath(nearestNeighbour(cities));
+                  }}
                 >
                   Nearest Neighbour
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => this.displayPath(cheapestInsertion(cities))}
+                  onClick={() => {
+                    this.reset(cities);
+                    this.displayPath(cheapestInsertion(cities));
+                  }}
                 >
                   Cheapest Insertion
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => this.displayPath(nearestInsertion(cities))}
+                  onClick={() => {
+                    this.reset(cities);
+                    this.displayPath(nearestInsertion(cities));
+                  }}
                 >
                   Nearest Insertion
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => this.displayPath(farthestInsertion(cities))}
+                  onClick={() => {
+                    this.reset(cities);
+                    this.displayPath(farthestInsertion(cities));
+                  }}
                 >
                   Farthest Insertion
                 </button>
@@ -212,11 +231,11 @@ export default class App extends React.Component {
               />
             );
           })}
-          {seeking[1].map((seekCity, idx) => {
-            return seeking[0].map((activeCity, idx) => {
+          {seeking[1].map((seekCity, outerIdx) => {
+            return seeking[0].map((activeCity, innerIdx) => {
               return (
                 <LineTo
-                  key={idx}
+                  key={`${outerIdx}${innerIdx}`}
                   from={`${activeCity.className}`}
                   to={`${seekCity.className}`}
                   borderColor="lightgrey"

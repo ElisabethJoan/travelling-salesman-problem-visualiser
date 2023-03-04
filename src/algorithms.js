@@ -122,7 +122,7 @@ function farthestInsertion(cities) {
     let dist = 0;
     route[counter]["unvisited"] = route[counter]["unvisited"].concat(cities);
 
-    // Find the closest unvisited city to any city in the tour (minimise d(uc, ct))
+    // Find the farthest unvisited city to any city in the tour (minimise d(uc, ct))
     for (let j = 0; j <= route[counter]["visited"].length - 1; j++) {
       route[counter]["active"].push([route[counter]["visited"][j]]);
       route[counter]["seeking"].push([]);
@@ -153,7 +153,7 @@ function farthestInsertion(cities) {
     route.push({ visited: [], active: [], seeking: [], unvisited: [] });
     counter++;
 
-    // Insert the closest city to the tour to the lowest cost edge
+    // Insert the farthest city to the tour to the lowest cost edge
     let temp = [...route[counter - 1]["visited"]];
     temp.splice(bestInsertion, 0, toAdd);
     route[counter]["visited"] = temp;
@@ -165,64 +165,63 @@ function cheapestInsertion(cities) {
   let route = [];
   route.push({ visited: [], active: [], seeking: [], unvisited: [] });
   // let bestIdx = Math.floor(Math.random() * (cities.length - 1));
-  let bestIdx = 0;
-  route[0]["visited"].push(cities[bestIdx]);
-  cities.splice(bestIdx, 1);
+  // Start with sub-graph of one node only
+  let cheapestCityIdx = 0;
+  route[0]["visited"].push(cities[cheapestCityIdx]);
+  cities.splice(cheapestCityIdx, 1);
 
-  // bestIdx = Math.floor(Math.random() * (cities.length - 1));
-  bestIdx = 1;
-  route[0]["visited"].push(cities[bestIdx]);
-  cities.splice(bestIdx, 1);
-
+  // Find node closest to the node in our existing tour and add it
+  let minDist = Infinity;
+  let dist = Infinity;
   let counter = 0;
   let seekCounter = 0;
-  while (cities.length > 0) {
-    let minDist = Infinity;
-    let dist = Infinity;
-    let bestInsertion = 0;
-    // Find every adjacent city and set them as active pairs
-    for (let j = 0; j <= route[counter]["visited"].length - 1; j++) {
-      if (j === route[counter]["visited"].length - 1) {
-        route[counter]["active"].push([
-          route[counter]["visited"][j],
-          route[counter]["visited"][0],
-        ]);
-      } else {
-        route[counter]["active"].push([
-          route[counter]["visited"][j],
-          route[counter]["visited"][j + 1],
-        ]);
+  route[counter]["unvisited"] = route[counter]["unvisited"].concat(cities);
+
+  // Find the closest unvisited city to any city in the tour (minimise d(uc, ct))
+  for (let j = 0; j <= route[counter]["visited"].length - 1; j++) {
+    route[counter]["active"].push([route[counter]["visited"][j]]);
+    route[counter]["seeking"].push([]);
+    for (let i = 0; i <= cities.length - 1; i++) {
+      route[counter]["seeking"][seekCounter].push([cities[i]]);
+      dist = distance(route[counter]["visited"][j], cities[i]);
+      if (dist < minDist) {
+        minDist = dist;
+        cheapestCityIdx = i;
       }
+    }
+    seekCounter++;
+  }
+  seekCounter = 0;
+
+  route.push({ visited: [], active: [], seeking: [], unvisited: [] });
+  counter++;
+
+  route[counter]["visited"] = route[counter - 1]["visited"].concat([
+    cities[cheapestCityIdx],
+  ]);
+  cities.splice(cheapestCityIdx, 1);
+  // route[counter]["unvisited"] = route[counter]["unvisited"].concat(cities);
+
+  while (cities.length > 0) {
+    // Find edge in tour and node not in tour such that distance equation is minimal
+    let minimal = Infinity;
+    let bestInsertion = 0;
+    for (let i = 0; i < cities.length; i++) {
+      let [insertionIdx, steps, cost] = minimiseInsertionCost(
+        route[counter]["visited"],
+        cities[i]
+      );
+      if (cost < minimal) {
+        minimal = cost;
+        cheapestCityIdx = i;
+        bestInsertion = insertionIdx;
+      }
+      route[counter]["active"].push([cities[i]]);
+      route[counter]["seeking"].push(steps);
+      // seekCounter++;
     }
 
-    // console.log(route[counter]);
-    // For each unvisited city calculate tour distance against all active pairs
-    // TODO convert this to check the total distance of the tour against each city
-    // TODO for the entire tour find the place the current city increases the cost the least
-    for (let j = 0; j <= route[counter]["active"].length - 1; j++) {
-      route[counter]["seeking"].push([]);
-      for (let i = 0; i <= cities.length - 1; i++) {
-        route[counter]["seeking"][seekCounter].push([cities[i]]);
-        dist =
-          distance(route[counter]["active"][j][0], cities[i]) +
-          distance(cities[i], route[counter]["active"][j][1]) -
-          distance(
-            route[counter]["active"][j][0],
-            route[counter]["active"][j][1]
-          );
-        // console.log(route[counter]["active"][j][0]);
-        // console.log(route[counter]["active"][j][1]);
-        // console.log(cities[i]);
-        // console.log(dist);
-        if (dist < minDist) {
-          minDist = dist;
-          bestIdx = i;
-          bestInsertion = j + 1;
-        }
-      }
-      seekCounter++;
-    }
-    // break;
+    // Insert found node in found edge
     route[counter]["unvisited"] = route[counter]["unvisited"].concat(cities);
 
     seekCounter = 0;
@@ -231,12 +230,11 @@ function cheapestInsertion(cities) {
     counter++;
 
     let temp = [...route[counter - 1]["visited"]];
-    temp.splice(bestInsertion, 0, cities[bestIdx]);
-    cities.splice(bestIdx, 1);
+    temp.splice(bestInsertion, 0, cities[cheapestCityIdx]);
+    cities.splice(cheapestCityIdx, 1);
     route[counter]["visited"] = route[counter]["visited"].concat(temp);
   }
-  // console.log(route);
-  console.log(calculateTour(route[counter]["visited"]));
+
   return route;
 }
 
@@ -255,15 +253,13 @@ function minimiseInsertionCost(tour, toAdd) {
       distance(tour[prev], toAdd) +
       distance(toAdd, tour[next]) -
       distance(tour[prev], tour[next]);
-    // console.log(cost);
-    // console.log(minCost);
     if (cost < minCost) {
       minCost = cost;
       bestInsertion = i + 1;
     }
   }
 
-  return [bestInsertion, insertionSteps];
+  return [bestInsertion, insertionSteps, minCost];
 }
 
 function calculateTour(tour) {
