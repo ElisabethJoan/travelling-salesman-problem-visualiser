@@ -218,13 +218,10 @@ function cheapestInsertion(cities) {
       }
       route[counter]["active"].push([cities[i]]);
       route[counter]["seeking"].push(steps);
-      // seekCounter++;
     }
 
     // Insert found node in found edge
     route[counter]["unvisited"] = route[counter]["unvisited"].concat(cities);
-
-    seekCounter = 0;
 
     route.push({ visited: [], active: [], seeking: [], unvisited: [] });
     counter++;
@@ -236,6 +233,50 @@ function cheapestInsertion(cities) {
   }
 
   return route;
+}
+
+// function clarkWrightSavings(cities) {
+//   let route = [];
+
+//   return route;
+// }
+
+function optimiseInsertion(cities, nodes) {
+  let tours = [];
+  let stable = false;
+  let bestTour = [...cities];
+  let bestTourLength = calculateTour(cities);
+  tours.push([bestTourLength, bestTour]);
+  while (!stable) {
+    stable = true;
+    for (let i = 0; i < cities.length - nodes; i++) {
+      for (let j = 0; j < cities.length; j++) {
+        let newTour = [...bestTour];
+        let toAdd = newTour.slice(i, nodes + i);
+        newTour.splice(i, nodes);
+        newTour.splice(j, 0, ...toAdd);
+        let tourLength = calculateTour(newTour);
+        if (bestTourLength > tourLength) {
+          stable = false;
+          bestTour = [...newTour];
+          bestTourLength = tourLength;
+          tours.push([tourLength, newTour]);
+        }
+      }
+    }
+  }
+  tours.sort(function (a, b) {
+    return b[0] - a[0];
+  });
+  return tours;
+}
+
+function nodeInsertion(cities) {
+  return optimiseInsertion(cities, 1);
+}
+
+function edgeInsertion(cities) {
+  return optimiseInsertion(cities, 2);
 }
 
 function minimiseInsertionCost(tour, toAdd) {
@@ -285,4 +326,6 @@ export {
   nearestInsertion,
   farthestInsertion,
   cheapestInsertion,
+  nodeInsertion,
+  edgeInsertion,
 };

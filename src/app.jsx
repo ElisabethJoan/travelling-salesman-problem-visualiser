@@ -6,6 +6,8 @@ import {
   nearestInsertion,
   farthestInsertion,
   cheapestInsertion,
+  nodeInsertion,
+  edgeInsertion,
 } from "./algorithms";
 import City, { createCities } from "./city";
 
@@ -114,6 +116,13 @@ export default class App extends React.Component {
     this.forceUpdate();
   }
 
+  async displayOptimisation(route) {
+    for (const step of route) {
+      this.setState({ lines: step[1].concat([step[1][0]]) });
+      await timer(this.state.ANIMATION_DELAY);
+    }
+  }
+
   render() {
     const { cities, seeking, lines, ANIMATION_DELAY, NUM_POINTS } = this.state;
 
@@ -171,10 +180,26 @@ export default class App extends React.Component {
                 <button>Temp</button>
               </li>
               <li>
-                <button>Temp</button>
+                <button
+                  onClick={() => {
+                    this.reset(cities);
+                    this.setState({ lines: [] });
+                    this.displayOptimisation(nodeInsertion(cities));
+                  }}
+                >
+                  Node Insertion
+                </button>
               </li>
               <li>
-                <button>Temp</button>
+                <button
+                  onClick={() => {
+                    this.reset(cities);
+                    this.setState({ lines: [] });
+                    this.displayOptimisation(edgeInsertion(cities));
+                  }}
+                >
+                  Edge Insertion
+                </button>
               </li>
             </ul>
           </div>
