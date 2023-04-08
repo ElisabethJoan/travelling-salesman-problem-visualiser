@@ -8,6 +8,7 @@ import {
   cheapestInsertion,
   nodeInsertion,
   edgeInsertion,
+  twoOpt,
 } from "./algorithms";
 import City, { createCities } from "./city";
 
@@ -131,7 +132,7 @@ export default class App extends React.Component {
       <div className="App">
         <div className="interface">
           <div className="algoButtons">
-            <h5>Algorithms</h5>
+            <h5>Constructed Heuristics</h5>
             <ul>
               <li>
                 <button
@@ -173,11 +174,21 @@ export default class App extends React.Component {
                   Farthest Insertion
                 </button>
               </li>
+            </ul>
+          </div>
+          <div className="algoButtons">
+            <h5>Optimisation Heuristics</h5>
+            <ul>
               <li>
-                <button>Temp</button>
-              </li>
-              <li>
-                <button>Temp</button>
+                <button 
+                  onClick={() => {
+                    this.reset(cities);
+                    this.setState({ lines: [] });
+                    this.displayOptimisation(twoOpt(cities));
+                  }}
+                >
+                  2-Opt
+                </button>
               </li>
               <li>
                 <button

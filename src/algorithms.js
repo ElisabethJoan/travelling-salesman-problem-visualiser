@@ -279,6 +279,36 @@ function edgeInsertion(cities) {
   return optimiseInsertion(cities, 2);
 }
 
+function twoOpt(cities) {
+  let tours = [];
+  let stable = false;
+  let bestTour = [...cities];
+  let bestTourLength = calculateTour(cities);
+  while (!stable) {
+    stable = true;
+    for (let i = 1; i < cities.length - 2; i++) {
+      for (let j = i + 1; j < cities.length - 1; j++) {
+        console.log(bestTour);
+        // pairwise exchange
+        let temp1 = bestTour.slice(0, i);
+        let temp2 = bestTour.slice(i, j + 1);
+        temp2.reverse();
+        let temp3 = bestTour.slice(j + 1);
+        let newTour = [...temp1, ...temp2, ...temp3];
+        let newTourLength = calculateTour(newTour);
+        if (bestTourLength > newTourLength) {
+          stable = false;
+          bestTour = [...newTour];
+          bestTourLength = newTourLength;
+          tours.push([newTourLength, newTour]);
+        }
+      }
+    }
+  }
+  console.log(tours)
+  return tours;
+}
+
 function minimiseInsertionCost(tour, toAdd) {
   let minCost = Infinity;
   let insertionSteps = [];
@@ -328,4 +358,5 @@ export {
   cheapestInsertion,
   nodeInsertion,
   edgeInsertion,
+  twoOpt,
 };
