@@ -284,11 +284,11 @@ function twoOpt(cities) {
   let stable = false;
   let bestTour = [...cities];
   let bestTourLength = calculateTour(cities);
+  tours.push([bestTourLength, bestTour])
   while (!stable) {
     stable = true;
     for (let i = 1; i < cities.length - 2; i++) {
       for (let j = i + 1; j < cities.length - 1; j++) {
-        console.log(bestTour);
         // pairwise exchange
         let temp1 = bestTour.slice(0, i);
         let temp2 = bestTour.slice(i, j + 1);
@@ -301,6 +301,75 @@ function twoOpt(cities) {
           bestTour = [...newTour];
           bestTourLength = newTourLength;
           tours.push([newTourLength, newTour]);
+        }
+      }
+    }
+  }
+  return tours;
+}
+
+function gain(i, j, k, meow) {
+
+}
+
+function threeOpt(cities) {
+  let tours = [];
+  let stable = false;
+  let bestTour = [...cities];
+  let bestTourLength = calculateTour(cities);
+  tours.push([bestTourLength, bestTour]);
+  while (!stable) {
+    stable = true;
+    for (let i = 1; i < cities.length - 1; i++) {
+      let A = bestTour[i - 1]
+      let B = bestTour[i];
+      if (!stable) {
+        break;
+      }
+      for (let j = i + 2; j < cities.length; j++) {
+        let C = bestTour[j - 1];
+        let D = bestTour[j];
+        if (!stable) {
+          break;
+        }
+        for (let k = j + 2; k < cities.length + 1; k++) {
+          let E = bestTour[k - 1];
+          let F = bestTour[k % cities.length];
+          let d0 = distance(A, B) + distance(C, D) + distance(E, F);
+          let d1 = distance(A, C) + distance(B, D) + distance(E, F);
+          let d2 = distance(A, B) + distance(C, E) + distance(D, F);
+          let d3 = distance(A, D) + distance(E, B) + distance(C, F);
+          let d4 = distance(F, B) + distance(C, D) + distance(E, A);
+          let delta = 0;
+          let newTour = [...bestTour];
+          if (d0 > d1) {
+            let temp = bestTour.slice(i, j + 1);
+            temp.reverse();
+            newTour.splice(i, temp.length, ...temp);
+            delta = -d0 + d1
+          } else if (d0 > d2) {
+            let temp = bestTour.slice(j, k + 1);
+            temp.reverse();
+            newTour.splice(j, temp.length, ...temp);
+            delta = -d0 + d2
+          } else if (d0 > d4) {
+            let temp = bestTour.slice(i, k + 1);
+            temp.reverse();
+            newTour.splice(i, temp.length, ...temp);
+            delta = -d0 + d4
+          } else if (d0 > d3) {
+            let temp1 = bestTour.slice(j, k + 1);
+            let temp2 = bestTour.slice(i, j + 1);
+            newTour.splice(i, temp1.length + temp2.length, ...temp1.concat(temp2));
+            delta = -d0 + d3
+          }
+          console.log(delta);
+          if (delta < 0) {
+            stable = false;
+            let newTourLength = calculateTour(newTour);
+            bestTour = [...newTour];
+            tours.push([newTourLength, newTour]);  
+          } 
         }
       }
     }
@@ -359,4 +428,5 @@ export {
   nodeInsertion,
   edgeInsertion,
   twoOpt,
+  threeOpt,
 };

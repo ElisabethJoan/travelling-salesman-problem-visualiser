@@ -9,6 +9,7 @@ import {
   nodeInsertion,
   edgeInsertion,
   twoOpt,
+  threeOpt,
 } from "./algorithms";
 import City, { createCities } from "./city";
 
@@ -31,7 +32,7 @@ export default class App extends React.Component {
       lines: [],
       seeking: [[{ className: "none" }], [{ className: "none" }]],
       ANIMATION_DELAY: 300,
-      NUM_POINTS: 5,
+      NUM_POINTS: 6,
     };
   }
 
@@ -191,6 +192,17 @@ export default class App extends React.Component {
                 </button>
               </li>
               <li>
+                <button 
+                  onClick={() => {
+                    this.reset(cities);
+                    this.setState({ lines: [] });
+                    this.displayOptimisation(threeOpt(cities));
+                  }}
+                >
+                  3-Opt
+                </button>
+              </li>
+              <li>
                 <button
                   onClick={() => {
                     this.reset(cities);
@@ -240,7 +252,7 @@ export default class App extends React.Component {
               <span>City Count</span>
               <Slider
                 defaultValue={NUM_POINTS}
-                min={3}
+                min={6}
                 step={1}
                 max={50}
                 graduated
