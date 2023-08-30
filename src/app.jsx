@@ -18,10 +18,6 @@ import "./css/app.css";
 
 const timer = (ms) => new Promise((res) => setTimeout(res, ms));
 
-const flipActive = (city) => {
-  city.isActive = !city.isActive;
-  city.isRoute = !city.isRoute;
-};
 
 export default class App extends React.Component {
   constructor(props) {
@@ -61,48 +57,50 @@ export default class App extends React.Component {
   }
 
   async displayPath(route) {
-    // console.log(route);
-    for (const step of route.slice(0, -1)) {
+    console.log(route);
+    for (const step of route) {
       let visited = step["visited"];
       let unvisited = step["unvisited"];
+      let active = step["active"];
 
       visited.forEach((e) => {
         e.isRoute = true;
       });
 
-      // console.log(visited);
-      // console.log(unvisited);
-      this.setState({ cities: visited.concat(unvisited), lines: visited });
-
-      for (let i = 0; i < step["active"].length; i++) {
-        // console.log(step["active"][i]);
-        // console.log(step["seeking"][i]);
-        // step["visited"][i].isActive = true;
-        // step["visited"][i].isRoute = false;
-        for (let j = 0; j < step["seeking"][i].length; j++) {
-          for (let k = 0; k < step["active"][i].length; k++) {
-            this.setState({
-              seeking: [step["active"][i], step["seeking"][i][j]],
-            });
-            await timer(this.state.ANIMATION_DELAY);
+      if (active.length > 0) {
+        this.setState({ cities: active.concat(visited.concat(unvisited)), lines: active.concat(visited) });
+        for (let i = 0; i < active.length; i++) {
+          active[i].isActive = true;
+          active[i].isRoute = false;
+          for (let j = 0; j < step["seeking"][i].length; j++) {
+              this.setState({
+                seeking: [[active[i]], step["seeking"][i][j]],
+              });
+              await timer(this.state.ANIMATION_DELAY);
           }
+          active[i].isActive = false;
+          active[i].isRoute = true;
         }
-        // step["visited"][i].isActive = false;
-        // step["visited"][i].isRoute = true;
       }
 
       if (step["chosen"]) {
+        if (active.length === 0) {
+          this.setState({ cities: visited.concat(unvisited.concat([step["chosen"]])), lines: [].concat(visited), seeking: this.state.seeking })
+        } 
         let chosenCity = step["chosen"];
         chosenCity.isActive = true;
         this.forceUpdate();
         let insertionSteps = step["insertionSteps"];
 
         for (let i = 0; i < insertionSteps.length; i++) {
-          // console.log(insertionSteps[i]);
           this.setState({
             seeking: [[chosenCity], insertionSteps[i]],
           });
           await timer(this.state.ANIMATION_DELAY);
+        }
+        chosenCity.isActive = false;
+        if (active.length > 0) {
+          chosenCity.isRoute = true;
         }
       }
     }
@@ -114,7 +112,6 @@ export default class App extends React.Component {
         route[route.length - 1]["visited"][0]
       ),
     });
-    // console.log(this.state.cities);
     this.forceUpdate();
   }
 
@@ -128,7 +125,6 @@ export default class App extends React.Component {
   render() {
     const { cities, seeking, lines, ANIMATION_DELAY, NUM_POINTS } = this.state;
 
-    // console.log(cities);
     return (
       <div className="App">
         <div className="interface">
