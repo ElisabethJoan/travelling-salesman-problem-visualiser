@@ -202,6 +202,181 @@ function cheapestInsertion(cities) {
   return route;
 }
 
+function lineDist(city1, city2, city) {
+  return Math.abs((city.y - city1.y) * (city2.x - city1.x) - (city2.y - city1.y) * (city.x - city1.x))
+}
+
+function findSide(city1, city2, city) {
+  let val = (city.y - city1.y) * (city2.x - city1.x) - (city2.y - city1.y) * (city.x - city1.x)
+
+  if (val > 0) {
+    return 1
+  }
+  if (val < 0) {
+    return -1
+  }
+  return 0
+}
+
+
+function quickHull(cities) {
+  let hull = new Set()
+  function quickHull(cities, city1, city2, side) {
+    let ind = -1
+    let maxDist = 0
+
+    for (let i = 0; i < cities.length; i++) {
+      let temp = lineDist(city1, city2, cities[i])
+      if ((findSide(city1, city2, cities[i]) == side) && (temp > maxDist)) {
+        ind = i
+        maxDist = temp
+      }
+    }
+
+    if (ind == -1) {
+      hull.add(city1)
+      hull.add(city2)
+      return
+    }
+    quickHull(cities, cities[ind], city1, -findSide(cities[ind], city1, city2))
+    quickHull(cities, cities[ind], city2, -findSide(cities[ind], city2, city1))
+  }
+  
+  let minX = 0;
+  let maxX = 0;
+  for (let i = 1; i < cities.length; i++) {
+    if (cities[i].x < cities[minX].x) {
+      minX = i
+    }
+    if (cities[i].x > cities[maxX].x) {
+      maxX = i
+    }
+  }
+  
+  quickHull(cities, cities[minX], cities[maxX], 1)
+
+  quickHull(cities, cities[minX], cities[maxX], -1)
+
+  return hull
+}
+
+function orderHull(hull) {
+	// calculate centroid
+  let cX = 0;
+  let cY = 0;
+
+  for (let i = 0; i < hull.length; i++) {
+    cX += hull[i].x
+    cY += hull[i].y
+  }
+  cX = cX / hull.length;
+  cY = cY / hull.length;
+  
+  // for each point in the hull calculate the angle from the centroid
+  let sortedHull = []	
+  hull.forEach((city) => {
+    let angle = Math.atan2(city.y - cY, city.x - cX) + 2 * Math.PI
+    sortedHull.push({ 'city': city, 'angle': angle })
+  });
+	
+  // sort the array of points based on the angles
+  sortedHull.sort(function(a, b) {
+    return (a.angle < b.angle)
+  })
+  //console.log(sortedHull)
+  
+  hull = []
+  sortedHull.forEach((city) => {
+    hull.push(city.city)
+  });
+
+  return hull
+}
+
+function convexHull(cities) {
+  // form the convex hull as initial sub-tour
+  let hullSet = quickHull(cities)
+  let hull = orderHull(Array.from(hullSet))
+  let tempCities = [...cities]
+  let deleteCount = 0;
+  for (let i = 0; i < cities.length; i++) {
+    for (let j = 0; j < hull.length; j++) {
+      if (hull[j].className == cities[i].className) {
+        tempCities.splice(i - deleteCount, 1);
+        deleteCount++;
+      }
+    }
+  }
+  cities = [...tempCities]
+  let route = []
+  let counter = 0;
+  route.push({ visited: [], active: [], chosen: undefined, insertionSteps: [], unvisited: [] });
+  while (cities.length > 0) {
+    let x = [];
+    let y = [];
+    let z = [];
+    for (let i = 0; i < cities.length; i++) {
+      route[counter]["visited"] = route[counter]["visited"].concat(hull);
+      route[counter]["chosen"] = cities[i];
+      const newCities = cities.filter(function (city) {
+        return city !== cities[i];
+      });
+      route[counter]["unvisited"] = route[counter]["unvisited"].concat(newCities);
+      let cost_idx = [];
+      for (let j = 0; j < hull.length; j++) {
+        let prev = j;
+        let next = j + 1;
+        if (j === hull.length - 1) {
+          next = 0;
+        }
+        cost_idx.push([hull[prev], cities[i], hull[next]]);
+      }
+      let cost_vec_1 = [];
+      let insertionSteps = [];
+      for (let j = 0; j < hull.length; j++) {
+        let prev = j;
+        let next = j + 1;
+        if (j === hull.length - 1) {
+          next = 0;
+        }
+        let cost =
+          distance(hull[prev], cities[i]) +
+          distance(cities[i], hull[next]) -
+          distance(hull[prev], hull[next]);
+        cost_vec_1.push(cost);
+        insertionSteps.push([hull[prev], hull[next]]);
+      }
+      let cost_vec_2 = [];
+      for (let j = 0; j < hull.length; j++) {
+        let prev = j;
+        let next = j + 1;
+        if (j === hull.length - 1) {
+          next = 0;
+        }
+        let cost =
+          distance(hull[prev], cities[i]) +
+          distance(cities[i], hull[next]) /
+          distance(hull[prev], hull[next]);
+        cost_vec_2.push(cost);
+        insertionSteps.push([hull[prev], hull[next]]);
+      }
+      x.push(cost_vec_1.indexOf(Math.min(...cost_vec_1)));
+      y.push(cost_vec_2[x.slice(-1)]);
+      z.push(cost_idx[x.slice(-1)]);
+      route[counter]["insertionSteps"] = route[counter]["insertionSteps"].concat(insertionSteps);
+      counter++;
+      route.push({ visited: [], active: [], chosen: undefined, insertionSteps: [], unvisited: [] });
+    }
+    let [asd, bsd, _] = z[y.indexOf(Math.min(...y))];
+    let bestIdx = cities.indexOf(bsd);
+    cities.splice(bestIdx, 1);
+    let insertIdx = hull.indexOf(asd);
+    hull.splice(insertIdx + 1, 0, bsd)
+  }
+  route[counter]["visited"] = route[counter]["visited"].concat(hull);
+  return route
+}
+
 // function clarkWrightSavings(cities) {
 //   let route = [];
 
@@ -275,76 +450,6 @@ function twoOpt(cities) {
   return tours;
 }
 
-function gain(i, j, k, meow) {
-
-}
-
-function threeOpt(cities) {
-  let tours = [];
-  let stable = false;
-  let bestTour = [...cities];
-  let bestTourLength = calculateTour(cities);
-  tours.push([bestTourLength, bestTour]);
-  while (!stable) {
-    stable = true;
-    for (let i = 1; i < cities.length - 1; i++) {
-      let A = bestTour[i - 1]
-      let B = bestTour[i];
-      if (!stable) {
-        break;
-      }
-      for (let j = i + 2; j < cities.length; j++) {
-        let C = bestTour[j - 1];
-        let D = bestTour[j];
-        if (!stable) {
-          break;
-        }
-        for (let k = j + 2; k < cities.length + 1; k++) {
-          let E = bestTour[k - 1];
-          let F = bestTour[k % cities.length];
-          let d0 = distance(A, B) + distance(C, D) + distance(E, F);
-          let d1 = distance(A, C) + distance(B, D) + distance(E, F);
-          let d2 = distance(A, B) + distance(C, E) + distance(D, F);
-          let d3 = distance(A, D) + distance(E, B) + distance(C, F);
-          let d4 = distance(F, B) + distance(C, D) + distance(E, A);
-          let delta = 0;
-          let newTour = [...bestTour];
-          if (d0 > d1) {
-            let temp = bestTour.slice(i, j + 1);
-            temp.reverse();
-            newTour.splice(i, temp.length, ...temp);
-            delta = -d0 + d1
-          } else if (d0 > d2) {
-            let temp = bestTour.slice(j, k + 1);
-            temp.reverse();
-            newTour.splice(j, temp.length, ...temp);
-            delta = -d0 + d2
-          } else if (d0 > d4) {
-            let temp = bestTour.slice(i, k + 1);
-            temp.reverse();
-            newTour.splice(i, temp.length, ...temp);
-            delta = -d0 + d4
-          } else if (d0 > d3) {
-            let temp1 = bestTour.slice(j, k + 1);
-            let temp2 = bestTour.slice(i, j + 1);
-            newTour.splice(i, temp1.length + temp2.length, ...temp1.concat(temp2));
-            delta = -d0 + d3
-          }
-          console.log(delta);
-          if (delta < 0) {
-            stable = false;
-            let newTourLength = calculateTour(newTour);
-            bestTour = [...newTour];
-            tours.push([newTourLength, newTour]);  
-          } 
-        }
-      }
-    }
-  }
-  console.log(tours)
-  return tours;
-}
-
 function minimiseInsertionCost(tour, toAdd) {
   let minCost = Infinity;
   let insertionSteps = [];
@@ -392,8 +497,8 @@ export {
   nearestInsertion,
   farthestInsertion,
   cheapestInsertion,
+  convexHull,
   nodeInsertion,
   edgeInsertion,
   twoOpt,
-  threeOpt,
 };

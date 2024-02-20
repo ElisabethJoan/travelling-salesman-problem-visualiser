@@ -6,10 +6,10 @@ import {
   nearestInsertion,
   farthestInsertion,
   cheapestInsertion,
+  convexHull,
   nodeInsertion,
   edgeInsertion,
   twoOpt,
-  threeOpt,
 } from "./algorithms";
 import City, { createCities } from "./city";
 
@@ -85,7 +85,7 @@ export default class App extends React.Component {
 
       if (step["chosen"]) {
         if (active.length === 0) {
-          this.setState({ cities: visited.concat(unvisited.concat([step["chosen"]])), lines: [].concat(visited), seeking: this.state.seeking })
+          this.setState({ cities: visited.concat(unvisited.concat([step["chosen"]])), lines: visited.concat(visited[0]), seeking: this.state.seeking })
         } 
         let chosenCity = step["chosen"];
         chosenCity.isActive = true;
@@ -120,6 +120,11 @@ export default class App extends React.Component {
       this.setState({ lines: step[1].concat([step[1][0]]) });
       await timer(this.state.ANIMATION_DELAY);
     }
+  }
+
+  async testPath(route) {
+    console.log(route)
+    this.setState({ lines: route.concat(route[0]) })
   }
 
   render() {
@@ -171,6 +176,16 @@ export default class App extends React.Component {
                   Farthest Insertion
                 </button>
               </li>
+              <li>
+                <button
+                  onClick={() => {
+                    this.reset(cities);
+                    this.displayPath(convexHull(cities));
+                  }}
+                >
+                  Convex Hull
+                </button>
+              </li>
             </ul>
           </div>
           <div className="algoButtons">
@@ -185,17 +200,6 @@ export default class App extends React.Component {
                   }}
                 >
                   2-Opt
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => {
-                    this.reset(cities);
-                    this.setState({ lines: [] });
-                    this.displayOptimisation(threeOpt(cities));
-                  }}
-                >
-                  3-Opt
                 </button>
               </li>
               <li>
