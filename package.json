@@ -2,6 +2,7 @@
   "name": "tsp-visualiser",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://elisabethjoan.github.io/travelling-salesman-problem-visualiser",
   "dependencies": {
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
