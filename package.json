@@ -4,17 +4,15 @@
   "private": true,
   "homepage": "https://elisabethjoan.github.io/travelling-salesman-problem-visualiser",
   "dependencies": {
+    "r3f-pack": "^3.0.3",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-lineto": "^3.3.0",
-    "react-scripts": "5.0.1",
     "rsuite": "^5.19.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "r3f-pack start",
+    "build": "r3f-pack build"
   },
   "browserslist": {
     "production": [
@@ -27,8 +25,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "@babel/plugin-transform-private-property-in-object": "^7.24.5"
   }
 }
