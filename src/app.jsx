@@ -1,6 +1,7 @@
 import React from "react";
 import LineTo from "react-lineto";
-import { Slider } from "rsuite";
+import Slider from "@mui/material/Slider";
+
 import {
   nearestNeighbour,
   nearestInsertion,
@@ -13,7 +14,6 @@ import {
 } from "./algorithms";
 import City, { createCities } from "./city";
 
-import "rsuite/dist/rsuite.min.css";
 import "./css/app.css";
 
 const timer = (ms) => new Promise((res) => setTimeout(res, ms));
@@ -236,14 +236,11 @@ export default class App extends React.Component {
             <li>
               <span>Animation Delay</span>
               <Slider
-                defaultValue={ANIMATION_DELAY}
                 min={5}
                 step={5}
                 max={100}
-                graduated
-                progress
                 value={ANIMATION_DELAY}
-                onChange={(value) => {
+                onChange={(_, value) => {
                   this.setState({ ANIMATION_DELAY: value });
                 }}
               />
@@ -251,14 +248,11 @@ export default class App extends React.Component {
             <li>
               <span>City Count</span>
               <Slider
-                defaultValue={NUM_POINTS}
                 min={6}
                 step={1}
                 max={50}
-                graduated
-                progress
                 value={NUM_POINTS}
-                onChange={(value) => {
+                onChange={(_, value) => {
                   this.setState({ NUM_POINTS: value });
                   this.begin();
                 }}
