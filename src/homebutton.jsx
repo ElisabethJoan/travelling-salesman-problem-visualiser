@@ -5,10 +5,7 @@ const HomeButton = () => {
   const navigate = useNavigate();
 
   const handleHomeClick = () => {
-    const referrer = localStorage.getItem("referrer") || "/"
-    console.log(referrer);
-    localStorage.removeItem("referrer");
-    navigate(referrer);
+    navigate("/");
   };
   
   return (
