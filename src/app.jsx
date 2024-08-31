@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Component } from "react";
 import LineTo from "react-lineto";
 import Slider from "@mui/material/Slider";
 
@@ -13,13 +13,14 @@ import {
   twoOpt,
 } from "./algorithms";
 import City, { createCities } from "./city";
+import HomeButton from "./homebutton";
 
 import "./css/app.css";
 
 const timer = (ms) => new Promise((res) => setTimeout(res, ms));
 
 
-export default class App extends React.Component {
+export default class App extends Component {
   constructor(props) {
     super(props);
 
@@ -44,6 +45,11 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
+    const referrer = document.referrer;
+    console.log(referrer);
+    if (referrer) {
+      localStorage.setItem("referrer", referrer);
+    }
     this.begin();
   }
 
@@ -133,6 +139,7 @@ export default class App extends React.Component {
     return (
       <div className="App">
         <div className="interface">
+          <HomeButton />
           <div className="algoButtons">
             <h5>Constructed Heuristics</h5>
             <ul>
