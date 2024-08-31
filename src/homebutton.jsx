@@ -1,16 +1,17 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 
 const HomeButton = () => {
-  const navigate = useNavigate();
-
+  const referrer = localStorage.getItem("referrer");
+  console.log(referrer);
   const handleHomeClick = () => {
-    navigate("/");
+    window.location.href = referrer;
   };
   
-  return (
-    <button onClick={handleHomeClick}>Home</button>
-  );
+  if (referrer) {
+    return (
+      <button onClick={handleHomeClick}>Home</button>
+    );
+  }
 }
 
 export default HomeButton;

@@ -45,6 +45,10 @@ export default class App extends Component {
   }
 
   componentDidMount() {
+    const referrer = document.referrer;
+    if (referrer) {
+      localStorage.setItem("referrer", referrer);
+    }
     this.begin();
   }
 
