@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import LineTo from "react-lineto";
-import Slider from "@mui/material/Slider";
+import { Button, Slider } from "@mui/material";
 
 import {
   nearestNeighbour,
@@ -18,7 +18,6 @@ import HomeButton from "./homebutton";
 import "./css/app.css";
 
 const timer = (ms) => new Promise((res) => setTimeout(res, ms));
-
 
 export default class App extends Component {
   constructor(props) {
@@ -143,54 +142,59 @@ export default class App extends Component {
             <h5>Constructed Heuristics</h5>
             <ul>
               <li>
-                <button
+                <Button
+                  variant="outlined"
                   onClick={() => {
                     this.reset(cities);
                     this.displayPath(nearestNeighbour(cities));
                   }}
                 >
                   Nearest Neighbour
-                </button>
+                </Button>
               </li>
               <li>
-                <button
+                <Button
+                  variant="outlined"
                   onClick={() => {
                     this.reset(cities);
                     this.displayPath(cheapestInsertion(cities));
                   }}
                 >
                   Cheapest Insertion
-                </button>
+                </Button>
               </li>
               <li>
-                <button
+                <Button
+                  variant="outlined"
                   onClick={() => {
                     this.reset(cities);
                     this.displayPath(nearestInsertion(cities));
                   }}
                 >
                   Nearest Insertion
-                </button>
+                </Button>
               </li>
               <li>
-                <button
+                <Button
+                  variant="outlined"
                   onClick={() => {
                     this.reset(cities);
                     this.displayPath(farthestInsertion(cities));
                   }}
                 >
                   Farthest Insertion
-                </button>
+                </Button>
               </li>
               <li>
-                <button
+                <Button
+                  variant="outlined"
                   onClick={() => {
                     this.reset(cities);
                     this.displayPath(convexHull(cities));
                   }}
                 >
                   Convex Hull
-                </button>
+                </Button>
               </li>
             </ul>
           </div>
@@ -198,7 +202,8 @@ export default class App extends Component {
             <h5>Optimisation Heuristics</h5>
             <ul>
               <li>
-                <button 
+                <Button
+                  variant="outlined"
                   onClick={() => {
                     this.reset(cities);
                     this.setState({ lines: [] });
@@ -206,10 +211,11 @@ export default class App extends Component {
                   }}
                 >
                   2-Opt
-                </button>
+                </Button>
               </li>
               <li>
-                <button
+                <Button
+                  variant="outlined"
                   onClick={() => {
                     this.reset(cities);
                     this.setState({ lines: [] });
@@ -217,10 +223,11 @@ export default class App extends Component {
                   }}
                 >
                   Node Insertion
-                </button>
+                </Button>
               </li>
               <li>
-                <button
+                <Button
+                  variant="outlined"
                   onClick={() => {
                     this.reset(cities);
                     this.setState({ lines: [] });
@@ -228,16 +235,22 @@ export default class App extends Component {
                   }}
                 >
                   Edge Insertion
-                </button>
+                </Button>
               </li>
             </ul>
           </div>
+          <div className="algoButtons">
           <ul>
             <li>
               <h5>Settings</h5>
             </li>
             <li>
-              <button onClick={() => this.begin()}>Generate New Array</button>
+              <Button
+                variant="outlined"
+                onClick={() => this.begin()}
+              >
+                Generate New Array     
+              </Button>
             </li>
             <li>
               <span>Animation Delay</span>
@@ -265,6 +278,7 @@ export default class App extends Component {
               />
             </li>
           </ul>
+          </div>
         </div>
         <div>
           {cities.map((city) => {
