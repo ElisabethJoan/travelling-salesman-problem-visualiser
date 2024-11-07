@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import LineTo from "react-lineto";
 import { Button, Slider } from "@mui/material";
 
+import { HomeRow } from "@elisabethjoan/portfolio-scaffold";
+
 import {
   nearestNeighbour,
   nearestInsertion,
@@ -13,7 +15,6 @@ import {
   twoOpt,
 } from "./algorithms";
 import City, { createCities } from "./city";
-import HomeButton from "./homebutton";
 
 import "./css/app.css";
 
@@ -136,8 +137,8 @@ export default class App extends Component {
 
     return (
       <div className="App">
+        <HomeRow extension={".jsx"} />
         <div className="interface">
-          <HomeButton />
           <div className="algoButtons">
             <h5>Constructed Heuristics</h5>
             <ul>
