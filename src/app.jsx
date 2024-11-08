@@ -1,7 +1,7 @@
 import * as React from "react";
 import LineTo from "react-lineto";
 
-import { HomeRow } from "@elisabethjoan/portfolio-scaffold";
+import { HomeRow, SketchWrapper } from "@elisabethjoan/portfolio-scaffold";
 
 import { Interface } from "./interface";
 import City, { createCities } from "./city";
@@ -14,18 +14,49 @@ export const App = () => {
   const [cities, setCities] = React.useState([]);
   const [lines, setLines] = React.useState([]);
   const [seeking, setSeeking] = React.useState([[{ className: "none" }], [{ className: "none" }]]);
-  const [animationDelay, setAnimationDelay] = React.useState(300);
+  const [animationDelay, setAnimationDelay] = React.useState(100);
   const [numPoints, setNumPoints] = React.useState(6);
+  const [wrapperDimensions, setWrapperDimensions] = React.useState({width: 0, height: 0, top: 0, left: 0});
+  const [initialized, setInitialized] = React.useState(false);
+  const wrapperRef = React.useRef(null);
 
   React.useEffect(() => {
-    begin();
+    const updateDimensions = () => {
+        if (wrapperRef.current) {
+            setWrapperDimensions({
+                width: wrapperRef.current.offsetWidth,
+                height: wrapperRef.current.offsetHeight,
+                top: wrapperRef.current.offsetTop,
+                left: wrapperRef.current.offsetLeft,
+            });
+        }
+    }
+    updateDimensions();
+    window.addEventListener("resize", updateDimensions);
+    return () => {
+        window.removeEventListener("resize", updateDimensions);
+    }
   }, []);
+
+  React.useEffect(() => {
+    if (!initialized && wrapperDimensions.left > 0 && wrapperDimensions.top > 0) {
+        begin();
+        setInitialized(true);
+    }
+  }, [wrapperDimensions, initialized])
+
+  function randomCoords() {
+    const { width, height, top, left } = wrapperDimensions; 
+    let x = Math.floor(Math.random() * ((left + width) - left + 1) + left);
+    let y = Math.floor(Math.random() * ((top + height) - top + 1) + top);
+    return [x, y];
+  }
 
   function begin() {
     const coords = [];
 
     for (let i = 0; i < numPoints; i++) {
-      coords.push(randomCoords(140, 700));
+      coords.push(randomCoords());
     }
 
     const cities = createCities(coords);
@@ -108,48 +139,50 @@ export const App = () => {
   return (
     <div className="App">
       <HomeRow extension={".jsx"} />
-      <div>
-        {cities.map((city) => {
-          return (
-            <City
-              key={city.className}
-              isRoute={city.isRoute}
-              isActive={city.isActive}
-              className={city.className}
-              x={city.x}
-              y={city.y}
-            />
-          );
-        })}
-        {seeking[1].map((seekCity, outerIdx) => {
-          return seeking[0].map((activeCity, innerIdx) => {
+      <SketchWrapper ref={wrapperRef} >
+        <div>
+          {cities.map((city) => {
             return (
-              <LineTo
-                key={`${outerIdx}${innerIdx}`}
-                from={`${activeCity.className}`}
-                to={`${seekCity.className}`}
-                borderColor="lightgrey"
+              <City
+                key={city.className}
+                isRoute={city.isRoute}
+                isActive={city.isActive}
+                className={city.className}
+                x={city.x}
+                y={city.y}
               />
             );
-          });
-        })}
-        {lines.map((line, idx, lines) => {
-          let end;
-          if (idx === lines.length - 1) {
-            end = line;
-          } else {
-            end = lines[idx + 1];
-          }
-          return (
-            <LineTo
-              key={idx}
-              from={`${line.className}`}
-              to={`${end.className}`}
-              borderColor="turquoise"
-            />
-          );
-        })}
-      </div>
+          })}
+          {seeking[1].map((seekCity, outerIdx) => {
+            return seeking[0].map((activeCity, innerIdx) => {
+              return (
+                <LineTo
+                  key={`${outerIdx}${innerIdx}`}
+                  from={`${activeCity.className}`}
+                  to={`${seekCity.className}`}
+                  borderColor="lightgrey"
+                />
+              );
+            });
+          })}
+          {lines.map((line, idx, lines) => {
+            let end;
+            if (idx === lines.length - 1) {
+              end = line;
+            } else {
+              end = lines[idx + 1];
+            }
+            return (
+              <LineTo
+                key={idx}
+                from={`${line.className}`}
+                to={`${end.className}`}
+                borderColor="turquoise"
+              />
+            );
+          })}
+        </div>
+      </SketchWrapper>
       <Interface 
         begin={begin}
         reset={reset}
@@ -167,8 +200,3 @@ export const App = () => {
   );
 }
 
-function randomCoords(min, max) {
-  let x = Math.floor(Math.random() * (max - min + 1) + min);
-  let y = Math.floor(Math.random() * (max - min + 1) + min);
-  return [x, y];
-}

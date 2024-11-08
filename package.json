@@ -2,7 +2,7 @@
   "name": "tsp-visualiser",
   "homepage": "https://elisabethjoan.github.io/travelling-salesman-problem-visualiser",
   "dependencies": {
-    "@elisabethjoan/portfolio-scaffold": "^0.0.6",
+    "@elisabethjoan/portfolio-scaffold": "^0.0.7",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@mui/material": "^6.0.0",

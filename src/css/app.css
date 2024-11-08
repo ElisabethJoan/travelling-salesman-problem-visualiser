@@ -28,3 +28,7 @@
     grid-template-rows: 1fr, 1fr;
     justify-self: center;
 }
+
+.SketchWrapper {
+    height: 70vh;
+}
