@@ -79,40 +79,40 @@ export const Interface = (props) => {
                 <h5>Optimisation Heuristics</h5>
                 <ul>
                     <li>
-                    <Button
-                        variant="outlined"
-                        onClick={() => {
-                            props.reset(props.cities);
-                            props.setLines([]);
-                            props.displayOptimisation(twoOpt(props.cities));
-                        }}
-                    >
-                        2-Opt
-                    </Button>
+                        <Button
+                            variant="outlined"
+                            onClick={() => {
+                                props.reset(props.cities);
+                                props.setLines([]);
+                                props.displayOptimisation(twoOpt(props.cities));
+                            }}
+                        >
+                            2-Opt
+                        </Button>
                     </li>
                     <li>
-                    <Button
-                        variant="outlined"
-                        onClick={() => {
-                            props.reset(props.cities);
-                            props.setLines([]);
-                            props.displayOptimisation(nodeInsertion(props.cities));
-                        }}
-                    >
-                      Node Insertion
-                    </Button>
+                        <Button
+                            variant="outlined"
+                            onClick={() => {
+                                props.reset(props.cities);
+                                props.setLines([]);
+                                props.displayOptimisation(nodeInsertion(props.cities));
+                            }}
+                        >
+                            Node Insertion
+                        </Button>
                     </li>
                     <li>
-                    <Button
-                        variant="outlined"
-                        onClick={() => {
-                            props.reset(props.cities);
-                            props.setLines([]);
-                            props.displayOptimisation(edgeInsertion(props.cities));
-                        }}
-                    >
-                        Edge Insertion
-                    </Button>
+                        <Button
+                            variant="outlined"
+                            onClick={() => {
+                                props.reset(props.cities);
+                                props.setLines([]);
+                                props.displayOptimisation(edgeInsertion(props.cities));
+                            }}
+                        >
+                            Edge Insertion
+                        </Button>
                   </li>
                 </ul>
             </div>
@@ -130,7 +130,7 @@ export const Interface = (props) => {
                         </Button>
                     </li>
                     <li>
-                        <span>Animation Delay</span>
+                        <h5>Animation Delay</h5>
                         <Slider
                             min={5}
                             step={5}
@@ -142,7 +142,7 @@ export const Interface = (props) => {
                         />
                     </li>
                     <li>
-                        <span>City Count</span>
+                        <h5>City Count</h5>
                         <Slider
                             min={6}
                             step={1}
