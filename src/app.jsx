@@ -175,7 +175,7 @@ export const App = () => {
                 key={idx}
                 from={`${line.className}`}
                 to={`${end.className}`}
-                borderColor="turquoise"
+                borderColor="#0288d1"
               />
             );
           })}
