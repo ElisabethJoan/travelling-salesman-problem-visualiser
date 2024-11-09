@@ -1,5 +1,6 @@
 import * as React from "react";
 import LineTo from "react-lineto";
+import { Mutex, Semaphore } from 'async-mutex';
 
 import { HomeRow, SketchWrapper } from "@elisabethjoan/portfolio-scaffold";
 
@@ -8,6 +9,8 @@ import City, { createCities } from "./city";
 
 import "./css/app.css";
 
+let lock = new Mutex();
+let sempahore = new Semaphore(1);
 const timer = (ms) => new Promise((res) => setTimeout(res, ms));
 
 export const App = () => {
@@ -75,6 +78,8 @@ export const App = () => {
   }
 
   async function displayPath(route) {
+    let release = await lock.acquire();
+    let [ , releaseSemaphore] = await sempahore.acquire();
     console.log(route);
     for (const step of route) {
       let visited = step["visited"];
@@ -125,13 +130,22 @@ export const App = () => {
     setCities(route[route.length - 1]["visited"]);
     setSeeking([[{ className: "none"}], [{ className: "none"}]]);
     setLines(route[route.length - 1]["visited"].concat(route[route.length - 1]["visited"][0]))
+    releaseSemaphore();  
+    release();
   }
 
   async function displayOptimisation(route) {
+    let release = await lock.acquire();
+    let [ , releaseSemaphore] = await sempahore.acquire();
     for (const step of route) {
+      for (const city of step[1]) {
+        city.isRoute = true;
+      }
       setLines(step[1].concat([step[1][0]]))
       await timer(animationDelay);
     }
+    releaseSemaphore();  
+    release();
   }
 
   return (
