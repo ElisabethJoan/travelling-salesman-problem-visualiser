@@ -14,8 +14,8 @@ export const App = () => {
   const [cities, setCities] = React.useState([]);
   const [lines, setLines] = React.useState([]);
   const [seeking, setSeeking] = React.useState([[{ className: "none" }], [{ className: "none" }]]);
-  const [animationDelay, setAnimationDelay] = React.useState(100);
-  const [numPoints, setNumPoints] = React.useState(6);
+  const [animationDelay, setAnimationDelay] = React.useState(50);
+  const [numPoints, setNumPoints] = React.useState(12);
   const [wrapperDimensions, setWrapperDimensions] = React.useState({width: 0, height: 0, top: 0, left: 0});
   const [initialized, setInitialized] = React.useState(false);
   const wrapperRef = React.useRef(null);
@@ -40,9 +40,9 @@ export const App = () => {
 
   React.useEffect(() => {
     if (!initialized && wrapperDimensions.left > 0 && wrapperDimensions.top > 0) {
-        begin();
         setInitialized(true);
     }
+    begin();
   }, [wrapperDimensions, initialized])
 
   function randomCoords() {
@@ -109,7 +109,6 @@ export const App = () => {
         } 
         let chosenCity = step["chosen"];
         chosenCity.isActive = true;
-        // this.forceUpdate();
         let insertionSteps = step["insertionSteps"];
 
         for (let i = 0; i < insertionSteps.length; i++) {
@@ -126,7 +125,6 @@ export const App = () => {
     setCities(route[route.length - 1]["visited"]);
     setSeeking([[{ className: "none"}], [{ className: "none"}]]);
     setLines(route[route.length - 1]["visited"].concat(route[route.length - 1]["visited"][0]))
-    // this.forceUpdate();
   }
 
   async function displayOptimisation(route) {

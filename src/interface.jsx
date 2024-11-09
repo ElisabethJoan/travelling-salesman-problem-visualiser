@@ -116,7 +116,7 @@ export const Interface = (props) => {
                   </li>
                 </ul>
             </div>
-            <div className="algoButtons">
+            <div className="settings">
                 <ul>
                     <li>
                         <h5>Settings</h5>
